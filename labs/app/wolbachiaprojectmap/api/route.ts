@@ -4,7 +4,11 @@ export async function GET(req: Request) {
     const uri = process.env.MONGODB_URI;
     const dbName = process.env.DB_NAME;
 
-    const client = new MongoClient(uri!);
+    if (!uri || !dbName) {
+        return new Response('Database URI or dbName not provided in server config', { status: 500 });
+    }
+
+    const client = new MongoClient(uri);
 
     try {
         await client.connect()
