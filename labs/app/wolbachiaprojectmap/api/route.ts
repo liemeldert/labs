@@ -1,15 +1,15 @@
 import { MongoClient } from 'mongodb'
 
 export async function GET(req: Request) {
-    const client = new MongoClient(process.env.MONGODB_URI, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-    })
+    const uri = process.env.MONGODB_URI;
+    const dbName = process.env.DB_NAME;
+
+    const client = new MongoClient(uri!);
 
     try {
         await client.connect()
 
-        const db = client.db(process.env.DB_NAME)
+        const db = client.db(dbName)
         const collection = db.collection('wolbachiaprojectdata')
 
         const data = await collection
