@@ -59,7 +59,7 @@ const WolbachiaMap: React.FC = () => {
         longitude: -95.7129,
         zoom: 5
       }}
-      style={{ height: '80vh', width: '90%' }}
+      style={{ height: '80vh', width: '100%' }}
       mapStyle="mapbox://styles/mapbox/dark-v11" 
       mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN} 
     >

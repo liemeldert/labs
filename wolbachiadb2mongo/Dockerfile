@@ -14,4 +14,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 80
 
 # Run wbdb2mongo.py when the container launches
-CMD ["python", "./wbdb2mongo.py"]
+ENTRYPOINT ["python", "./wbdb2mongo.py"]
+CMD []
