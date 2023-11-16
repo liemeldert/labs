@@ -34,14 +34,15 @@ const WolbachiaMap: React.FC = () => {
   const heatmapPoints: FeatureCollection<Point> = {
     type: 'FeatureCollection',
     features: data
-      .filter(item => item.wolbachia_presence.toLowerCase() === 'yes')
+      .filter(item => ['yes', 'no'].includes(item.wolbachia_presence.toLowerCase()))
       .map(item => {
         const longitude = parseFloat(item.location_lon);
         const latitude = parseFloat(item.location_lat);
-  
+        const intensity = item.wolbachia_presence.toLowerCase() === 'yes' ? 1 : -1;
+
         const feature: Feature<Point> = {
           type: 'Feature',
-          properties: {},
+          properties: { intensity },
           geometry: {
             type: 'Point',
             coordinates: [longitude, latitude]
@@ -59,8 +60,8 @@ const WolbachiaMap: React.FC = () => {
         zoom: 5
       }}
       style={{ height: '100vh', width: '100%' }}
-      mapStyle="mapbox://styles/mapbox/dark-v11" // Use your preferred map style
-      mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN} // Ensure you have a Mapbox access token
+      mapStyle="mapbox://styles/mapbox/dark-v11" 
+      mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN} 
     >
     <Source id="heatmap-source" type="geojson" data={{
         type: "FeatureCollection",
@@ -70,8 +71,39 @@ const WolbachiaMap: React.FC = () => {
           id="heatmap-layer"
           type="heatmap"
           paint={{
-            // Heatmap layer properties here
-            'heatmap-weight': 15,
+            // Use the 'intensity' property to scale the weight of each point
+            'heatmap-weight': [
+              'interpolate',
+              ['linear'],
+              ['get', 'intensity'],
+              -1, 0,
+              0, 0,
+              1, 1
+            ],
+            // Additional heatmap properties
+            'heatmap-intensity': {
+              'stops': [
+                [11, 1],
+                [15, 3]
+              ]
+            },
+            'heatmap-color': [
+              'interpolate',
+              ['linear'],
+              ['heatmap-density'],
+              0, 'rgba(33,102,172,0)',
+              0.2, 'rgb(103,169,207)',
+              0.4, 'rgb(209,229,240)',
+              0.6, 'rgb(253,219,199)',
+              0.8, 'rgb(239,138,98)',
+              1, 'rgb(178,24,43)'
+            ],
+            'heatmap-radius': {
+              'stops': [
+                [11, 15],
+                [15, 20]
+              ]
+            }
           }}
         />
       </Source>
