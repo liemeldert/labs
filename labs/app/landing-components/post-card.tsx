@@ -1,4 +1,5 @@
-import { Grid, Card, CardBody, Image, Stack, Heading, Text, Divider, CardFooter, ButtonGroup, Button } from "@chakra-ui/react";
+import { Center, Grid, Card, CardBody, Image, Stack, Heading, Text, Divider, CardFooter, ButtonGroup, Button } from "@chakra-ui/react";
+import { useRouter } from "next/navigation";
 
 interface Post {
     image: string;
@@ -13,6 +14,7 @@ interface PostCardProps {
 }
 
 const PostCard: React.FC<PostCardProps> = ({ posts }) => {
+    const router = useRouter();
     return (
         <Grid templateColumns="repeat(auto-fill, minmax(250px, 1fr))" gap={6}>
             {posts.map((post, index) => (
@@ -30,11 +32,13 @@ const PostCard: React.FC<PostCardProps> = ({ posts }) => {
                     </CardBody>
                     <Divider />
                     <CardFooter>
-                        <ButtonGroup spacing='2'>
-                            <Button variant='solid' colorScheme='blue'>
-                                See more
-                            </Button>
-                        </ButtonGroup>
+                        <Center>
+                            {/* <ButtonGroup spacing='2'> */}
+                                <Button variant='solid' colorScheme='blue' onClick={() => router.push(post.link)}>
+                                    See more
+                                </Button>
+                            {/* </ButtonGroup> */}
+                        </Center>
                     </CardFooter>
                 </Card>
             ))}

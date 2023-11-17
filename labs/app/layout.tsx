@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import { Providers } from './providers'
 import Header from './landing-components/heading'
 import SiteFooter from './landing-components/footer'
+import {Box, DarkMode} from '@chakra-ui/react'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,9 +21,12 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
           <Providers>
-            <Header />
-            {children}
-            <SiteFooter />
+              <DarkMode>
+                  <Header />
+                  <Box />
+                  {children}
+                  <SiteFooter />
+              </DarkMode>
           </Providers>
         </body>
     </html>

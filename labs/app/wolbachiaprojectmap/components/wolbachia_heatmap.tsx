@@ -3,9 +3,17 @@ import axios from "axios";
 import { Feature, FeatureCollection, Point } from "geojson";
 import { Map, Source, Layer } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { Spinner, Box, Text, Center } from "@chakra-ui/react";
+import {
+  Spinner,
+  Box,
+  Text,
+  Center,
+  useToast,
+  UseToastOptions,
+} from "@chakra-ui/react";
+import { HeatmapLayer, Points } from "./map_layers";
 
-interface WolbachiaData {
+export interface WolbachiaData {
   entry_link: string;
   entry_title: string;
   wolbachia_presence: "yes" | "no" | "unknown";
@@ -13,23 +21,54 @@ interface WolbachiaData {
   location_lat: string;
 }
 
-const fetchWolbachiaData = async (): Promise<WolbachiaData[]> => {
+interface WolbachiaMapProps {
+  filter_heatmap_wolbachia: "yes" | "no" | "unknown" | "both";
+  show_heatmap_wolbachia: boolean;
+  show_points_wolbachia: boolean;
+}
+
+const fetchWolbachiaData = async (
+  toast: (options: UseToastOptions) => void
+): Promise<WolbachiaData[]> => {
   try {
     const response = await axios.get("wolbachiaprojectmap/api");
     console.log(response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching data:", error);
+    const description = error ? error.toString() : "Unknown error, good luck!";
+    toast({
+      title: "An error occured when fetching data.",
+      description: description,
+      status: "error",
+      duration: 9000,
+      isClosable: true,
+    });
     return [];
   }
 };
 
-const WolbachiaMap: React.FC = () => {
+const WolbachiaMap: React.FC<WolbachiaMapProps> = (props) => {
   const [data, setData] = useState<WolbachiaData[]>([]);
+  const toast = useToast();
 
   useEffect(() => {
-    fetchWolbachiaData().then(setData);
-  }, []);
+    fetchWolbachiaData(toast).then((data) => {
+      let filteredData;
+      if (props.filter_heatmap_wolbachia !== "both") {
+        console.log("Filtering data to " + props.filter_heatmap_wolbachia);
+        filteredData = data.filter(
+          (item) =>
+            item.wolbachia_presence.toLowerCase() ===
+            props.filter_heatmap_wolbachia
+        );
+      } else {
+        filteredData = data;
+      }
+      console.log(filteredData);
+      setData(filteredData);
+    });
+  }, [props.filter_heatmap_wolbachia, toast]);
 
   const [mapboxKey, setMapboxKey] = useState<string | null>(null);
 
@@ -43,8 +82,15 @@ const WolbachiaMap: React.FC = () => {
       })
       .catch((error) => {
         console.error("Error:", error);
+        toast({
+          title: "An error occured when fetching mapbox key.",
+          description: error.toString(),
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        });
       });
-  }, []);
+  }, [toast]);
 
   const heatmapPoints: FeatureCollection<Point> = {
     type: "FeatureCollection",
@@ -55,8 +101,9 @@ const WolbachiaMap: React.FC = () => {
       .map((item) => {
         const longitude = parseFloat(item.location_lon);
         const latitude = parseFloat(item.location_lat);
-        const intensity =
-          item.wolbachia_presence.toLowerCase() === "yes" ? 1 : -1;
+        const intensity = item.wolbachia_presence.toLowerCase() === "yes" ? 1 : 0;
+        // const intensity =
+        //   item.wolbachia_presence.toLowerCase() === "yes" ? 1 : -1;
 
         const feature: Feature<Point> = {
           type: "Feature",
@@ -72,22 +119,22 @@ const WolbachiaMap: React.FC = () => {
 
   if (!mapboxKey) {
     return (
-      <Box>
+      <Center>
         <Spinner />
         <Text>Waiting for API key...</Text>
-      </Box>
+      </Center>
     );
   }
 
   if (!data) {
     return (
-      <Box>
+      <Center>
         <Spinner />
         <Text>Waiting for map data...</Text>
-      </Box>
+      </Center>
     );
   }
-  if (data && mapboxKey && data.length != 0) {
+  if (data && mapboxKey) {
     return (
       <Map
         initialViewState={{
@@ -107,82 +154,26 @@ const WolbachiaMap: React.FC = () => {
             features: heatmapPoints.features,
           }}
         >
-          <Layer
-            id="heatmap-layer"
-            type="heatmap"
-            source="heatmap-source"
-            maxzoom={9}
-            paint={{
-              // Increase the heatmap weight based on frequency and property magnitude
-              "heatmap-weight": [
-                "interpolate",
-                ["linear"],
-                ["get", "mag"],
-                0,
-                0,
-                6,
-                1,
-              ],
-              // Increase the heatmap color weight weight by zoom level
-              // heatmap-intensity is a multiplier on top of heatmap-weight
-              "heatmap-intensity": [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                0,
-                1,
-                9,
-                3,
-              ],
-              // Color ramp for heatmap.  Domain is 0 (low) to 1 (high).
-              // Begin color ramp at 0-stop with a 0-transparancy color
-              // to create a blur-like effect.
-              "heatmap-color": [
-                "interpolate",
-                ["linear"],
-                ["heatmap-density"],
-                0,
-                "rgba(33,102,172,0)",
-                0.2,
-                "rgb(103,169,207)",
-                0.4,
-                "rgb(209,229,240)",
-                0.6,
-                "rgb(253,219,199)",
-                0.8,
-                "rgb(239,138,98)",
-                1,
-                "rgb(178,24,43)",
-              ],
-              // Adjust the heatmap radius by zoom level
-              "heatmap-radius": [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                0,
-                2,
-                9,
-                20,
-              ],
-              // Transition from heatmap to circle layer by zoom level
-              "heatmap-opacity": [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                7,
-                1,
-                9,
-                0,
-              ],
-            }}
-          />  
+          {props.show_heatmap_wolbachia && <HeatmapLayer />}
+          {props.show_points_wolbachia && <Points data={data} />}
         </Source>
       </Map>
     );
   } else {
+    if (!data || !mapboxKey) {
+      toast({
+        title: "Error",
+        description: `Missing data: ${!data ? "map data" : ""}${
+          !data && !mapboxKey ? " and " : ""
+        }${!mapboxKey ? "API key" : ""}`,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
     return (
       <Center>
-        <Text>An error occurred trying to retrieve data.</Text>
+        <Text color="red.50">An error occurred trying to retrieve data.</Text>
       </Center>
     );
   }
