@@ -11,7 +11,7 @@ import {
   useToast,
   UseToastOptions,
 } from "@chakra-ui/react";
-import { HeatmapLayer, Points } from "./map_layers";
+import { NegativeHeatmapLayer, Points, PositiveHeatmapLayer } from "./map_layers";
 
 export interface WolbachiaData {
   entry_link: string;
@@ -23,7 +23,8 @@ export interface WolbachiaData {
 
 interface WolbachiaMapProps {
   filter_heatmap_wolbachia: "yes" | "no" | "unknown" | "both";
-  show_heatmap_wolbachia: boolean;
+  show_heatmap_positive_wolbachia: boolean;
+  show_heatmap_negative_wolbachia: boolean;
   show_points_wolbachia: boolean;
 }
 
@@ -101,13 +102,52 @@ const WolbachiaMap: React.FC<WolbachiaMapProps> = (props) => {
       .map((item) => {
         const longitude = parseFloat(item.location_lon);
         const latitude = parseFloat(item.location_lat);
-        const intensity = item.wolbachia_presence.toLowerCase() === "yes" ? 1 : 0;
+        const intensity =
+          item.wolbachia_presence.toLowerCase() === "yes" ? 1 : 0;
         // const intensity =
         //   item.wolbachia_presence.toLowerCase() === "yes" ? 1 : -1;
 
         const feature: Feature<Point> = {
           type: "Feature",
           properties: { intensity },
+          geometry: {
+            type: "Point",
+            coordinates: [longitude, latitude],
+          },
+        };
+        return feature;
+      }),
+  };
+
+  const positivePoints: FeatureCollection<Point> = {
+    type: "FeatureCollection",
+    features: data
+      .filter((item) => item.wolbachia_presence.toLowerCase() === "yes")
+      .map((item) => {
+        const longitude = parseFloat(item.location_lon);
+        const latitude = parseFloat(item.location_lat);
+        const feature: Feature<Point> = {
+          type: "Feature",
+          properties: { intensity: 1 },
+          geometry: {
+            type: "Point",
+            coordinates: [longitude, latitude],
+          },
+        };
+        return feature;
+      }),
+  };
+
+  const negativePoints: FeatureCollection<Point> = {
+    type: "FeatureCollection",
+    features: data
+      .filter((item) => item.wolbachia_presence.toLowerCase() === "no")
+      .map((item) => {
+        const longitude = parseFloat(item.location_lon);
+        const latitude = parseFloat(item.location_lat);
+        const feature: Feature<Point> = {
+          type: "Feature",
+          properties: { intensity: 1 },
           geometry: {
             type: "Point",
             coordinates: [longitude, latitude],
@@ -147,16 +187,28 @@ const WolbachiaMap: React.FC<WolbachiaMapProps> = (props) => {
         mapboxAccessToken={mapboxKey}
       >
         <Source
-          id="heatmap-source"
+        id="negative-heatmap-source"
+        type="geojson"
+        data={{
+            type: "FeatureCollection",
+            features: negativePoints.features,
+        }}
+        >
+            {/* {props.show_heatmap_wolbachia && <HeatmapLayer />} */}
+            {props.show_heatmap_negative_wolbachia && <NegativeHeatmapLayer />}
+            {props.show_points_wolbachia && <Points data={data} />}
+        </Source>
+        <Source
+          id="positive-heatmap-source"
           type="geojson"
           data={{
             type: "FeatureCollection",
-            features: heatmapPoints.features,
+            features: positivePoints.features,
           }}
         >
-          {props.show_heatmap_wolbachia && <HeatmapLayer />}
-          {props.show_points_wolbachia && <Points data={data} />}
+           { props.show_heatmap_positive_wolbachia && <PositiveHeatmapLayer />}
         </Source>
+        
       </Map>
     );
   } else {
@@ -171,6 +223,15 @@ const WolbachiaMap: React.FC<WolbachiaMapProps> = (props) => {
         isClosable: true,
       });
     }
+    toast({
+      title: "Error",
+      description: `Something broke: ${!data ? "map data" : ""}${
+        !data && !mapboxKey ? " and " : ""
+      }${!mapboxKey ? "API key" : ""}`,
+      status: "error",
+      duration: 5000,
+      isClosable: true,
+    });
     return (
       <Center>
         <Text color="red.50">An error occurred trying to retrieve data.</Text>

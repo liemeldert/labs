@@ -30,7 +30,8 @@ export default function MapPage() {
   const router = useRouter();
   const theme = useTheme();
 
-  const [showHeatmap, setShowHeatmap] = useState(true);
+  const [showHeatmapPositive, setShowHeatmapPositive] = useState(true);
+  const [showHeatmapNegative, setShowHeatmapNegative] = useState(false);
   const [showPoints, setShowPoints] = useState(false);
   const [filterWolbachia, setFilterWolbachia] = useState<
     "yes" | "no" | "unknown" | "both"
@@ -53,7 +54,8 @@ export default function MapPage() {
               Data sourced from the Wolbachia Project
             </Text>
             <WolbachiaMap
-              show_heatmap_wolbachia={showHeatmap}
+              show_heatmap_negative_wolbachia={showHeatmapNegative}
+              show_heatmap_positive_wolbachia={showHeatmapPositive}
               filter_heatmap_wolbachia={filterWolbachia}
               show_points_wolbachia={showPoints}
             />
@@ -68,28 +70,25 @@ export default function MapPage() {
                   <DrawerBody>
                     <FormControl display="flex" alignItems="center">
                       <FormLabel htmlFor="show-heatmap" mb="0">
-                        Show Heatmap
+                        Show Positive Heatmap
                       </FormLabel>
                       <Switch
-                        id="show-heatmap"
-                        isChecked={showHeatmap}
-                        onChange={(e) => setShowHeatmap(e.target.checked)}
+                        id="show-heatmap-pos"
+                        isChecked={showHeatmapPositive}
+                        onChange={(e) =>
+                          setShowHeatmapPositive(e.target.checked)
+                        }
                       />
-                    </FormControl>
-
-                    <FormControl mt={4}>
-                      <FormLabel htmlFor="filter-wolbachia">
-                        Filter Wolbachia to positive/negative cases
+                      <FormLabel htmlFor="show-heatmap" mb="0">
+                        Show Negative Heatmap
                       </FormLabel>
-                      <Select
-                        id="filter-wolbachia"
-                        value={filterWolbachia}
-                        onChange={(e) => setFilterWolbachia(e.target.value as "yes" | "no" | "unknown" | "both")}
-                        >
-                        <option value="both">Both</option>
-                        <option value="yes">Positive</option>
-                        <option value="no">Negative</option>
-                      </Select>
+                      <Switch
+                        id="show-heatmap-neg"
+                        isChecked={showHeatmapNegative}
+                        onChange={(e) =>
+                          setShowHeatmapNegative(e.target.checked)
+                        }
+                      />
                     </FormControl>
 
                     <FormControl display="flex" alignItems="center" mt={4}>
