@@ -32,27 +32,14 @@ export function PositiveHeatmapLayer() {
           1,
         ],
         "heatmap-radius": [
-            "/",
-            [
-              "+",
-              // Interpolation based on zoom
-              [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                0, 10, // when zoom is 0, radius is 10
-                14, 50 // when zoom is 14, radius is 50
-              ],
-              // Interpolation based on data amount
-              [
-                "interpolate",
-                ["linear"],
-                ["get", "dataAmount"],
-                0, 10, // when dataAmount is 0, radius is 10
-                100, 50 // when dataAmount is 100, radius is 50
-              ]
-            ],
-            2 // Divide by 2 to get the average
+            "interpolate",
+            ["linear"],
+            ["get", "dataAmount"],
+            0, 10,
+            25, 25,
+            50, 50,
+            75, 75,
+            100, 100
           ],
         // Increase the heatmap color weight weight by zoom level
         // heatmap-intensity is a multiplier on top of heatmap-weight
@@ -103,27 +90,14 @@ export function NegativeHeatmapLayer() {
           1,
         ],
         "heatmap-radius": [
-            "/",
-            [
-              "+",
-              // Interpolation based on zoom
-              [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                0, 10, // when zoom is 0, radius is 10
-                14, 50 // when zoom is 14, radius is 50
-              ],
-              // Interpolation based on data amount
-              [
-                "interpolate",
-                ["linear"],
-                ["get", "dataAmount"],
-                0, 10, // when dataAmount is 0, radius is 10
-                100, 50 // when dataAmount is 100, radius is 50
-              ]
-            ],
-            2 // Divide by 2 to get the average
+            "interpolate",
+            ["linear"],
+            ["get", "dataAmount"],
+            0, 10,
+            25, 25,
+            50, 50,
+            75, 75,
+            100, 100
           ],
         // Increase the heatmap color weight weight by zoom level
         // heatmap-intensity is a multiplier on top of heatmap-weight
