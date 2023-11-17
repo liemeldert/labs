@@ -16,7 +16,6 @@ import {
     ExtrusionLayer,
   NegativeHeatmapLayer,
   PointLayer,
-  Points,
   PositiveHeatmapLayer,
 } from "./map_layers";
 
