@@ -18,8 +18,9 @@ import {
   DrawerOverlay,
   FormControl,
   FormLabel,
-  Select,
+  Heading,
   Switch,
+  Divider,
 } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import WolbachiaMap from "./components/wolbachia_heatmap";
@@ -44,15 +45,19 @@ export default function MapPage() {
       <Center>
         <Flex w={"90%"}>
           <VStack w={"100%"}>
-            <Text fontSize={"lg"}>Interative Wolbachia Map</Text>
-            <Text
-              as={motion.text}
-              whileHover={{ scale: 1.1, color: theme.colors.blue[300] }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => router.push("https://wolbachiaproject.org/")}
-            >
-              Data sourced from the Wolbachia Project
-            </Text>
+            <Heading size={"lg"}>Interative <em>Wolbachia</em> Map</Heading>
+            <Button as={motion.button}
+                variant={"ghost"}
+                whileHover={{ scale: 1.1, color: theme.colors.blue[300] }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => router.push("https://wolbachiaproject.org/")}
+                >
+                <Heading
+                size={"sm"}
+                >
+                Data sourced from the <em>Wolbachia</em> Project
+                </Heading>
+            </Button>
             <WolbachiaMap
               show_heatmap_negative_wolbachia={showHeatmapNegative}
               show_heatmap_positive_wolbachia={showHeatmapPositive}
@@ -66,6 +71,7 @@ export default function MapPage() {
                 <DrawerContent>
                   <DrawerCloseButton />
                   <DrawerHeader>Configure Map</DrawerHeader>
+                  <Divider />
 
                   <DrawerBody>
                     <FormControl display="flex" alignItems="center">
@@ -79,6 +85,9 @@ export default function MapPage() {
                           setShowHeatmapPositive(e.target.checked)
                         }
                       />
+                    </FormControl>
+
+                    <FormControl display="flex" alignItems="center" mt={4}>
                       <FormLabel htmlFor="show-heatmap" mb="0">
                         Show Negative Heatmap
                       </FormLabel>
@@ -90,7 +99,7 @@ export default function MapPage() {
                         }
                       />
                     </FormControl>
-
+                    <Divider mt={4} mb={4}/>
                     <FormControl display="flex" alignItems="center" mt={4}>
                       <FormLabel htmlFor="show-points" mb="0">
                         Show Points
