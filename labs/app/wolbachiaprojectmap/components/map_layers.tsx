@@ -19,7 +19,7 @@ export function PositiveHeatmapLayer() {
       id="heatmap-layer-pos"
       type="heatmap"
       source="positive-heatmap-source"
-      maxzoom={0}
+      maxzoom={14}
       paint={{
         // Increase the heatmap weight based on frequency and property magnitude
         "heatmap-weight": [
@@ -31,6 +31,7 @@ export function PositiveHeatmapLayer() {
           1,
           1,
         ],
+        "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 1, 3, 9, 30],
         // Increase the heatmap color weight weight by zoom level
         // heatmap-intensity is a multiplier on top of heatmap-weight
         "heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 0, 1, 9, 3],
@@ -54,8 +55,6 @@ export function PositiveHeatmapLayer() {
           1,
           "rgb(178,24,43)",
         ],
-        // Adjust the heatmap radius by zoom level
-        "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 1, 2, 9, 20],
         // Transition from heatmap to circle layer by zoom level
         "heatmap-opacity": ["interpolate", ["linear"], ["zoom"], 7, 1, 9, 0],
       }}
@@ -69,7 +68,7 @@ export function NegativeHeatmapLayer() {
       id="heatmap-layer"
       type="heatmap"
       source="negative-heatmap-source"
-      maxzoom={0}
+      maxzoom={14}
       paint={{
         // Increase the heatmap weight based on frequency and property magnitude
         "heatmap-weight": [
@@ -81,6 +80,7 @@ export function NegativeHeatmapLayer() {
           1,
           1,
         ],
+        "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 1, 3, 9, 30],
         // Increase the heatmap color weight weight by zoom level
         // heatmap-intensity is a multiplier on top of heatmap-weight
         "heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 0, 1, 9, 3],
@@ -104,8 +104,6 @@ export function NegativeHeatmapLayer() {
           1,
           "rgb(103,169,207)",
         ],
-        // Adjust the heatmap radius by zoom level
-        "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 1, 2, 9, 20],
         // Transition from heatmap to circle layer by zoom level
         "heatmap-opacity": ["interpolate", ["linear"], ["zoom"], 7, 1, 9, 0],
       }}
@@ -113,57 +111,75 @@ export function NegativeHeatmapLayer() {
   );
 }
 
-export const Points: React.FC<{ data: WolbachiaData[] }> = ({ data }) => {
-  const [selectedPoint, setSelectedPoint] = useState<WolbachiaData | null>(
-    null
-  );
-  const router = useRouter();
+export function ExtrusionLayer() {
+    return (
+        <Layer
+        id="extrusion-layer"
+        type="fill-extrusion"
+        source="combined-source"
+        paint={{
+            'fill-extrusion-color': [
+            'interpolate',
+            ['linear'],
+            ['get', 'ratio'],
+            0, 'blue',
+            1, 'red'
+            ],
+            'fill-extrusion-height': [
+            'interpolate',
+            ['linear'],
+            ['get', 'ratio'],
+            0, 0,
+            1, 500
+            ],
+            'fill-extrusion-base': 0,
+            'fill-extrusion-opacity': 0.6
+        }}
+        />
+    )
+}
 
-  return (
-    <div>
-      {data.map((point, index) => (
-        <Marker
-          key={index}
-          longitude={parseFloat(point.location_lon)}
-          latitude={parseFloat(point.location_lat)}
-        >
-          <Button onClick={() => setSelectedPoint(point)} size="sm">
-            Point
-          </Button>
-        </Marker>
-      ))}
-
-      {selectedPoint && (
-        <Popup
-          longitude={parseFloat(selectedPoint.location_lon)}
-          latitude={parseFloat(selectedPoint.location_lat)}
-          onClose={() => setSelectedPoint(null)}
-        >
-          <Popover>
-            <PopoverTrigger>
-              <Button>Open Popover</Button>
-            </PopoverTrigger>
-            <PopoverContent>
-              <PopoverHeader>{selectedPoint.entry_title}</PopoverHeader>
-              <PopoverBody>
-                <Text
-                  size={"md"}
-                  onClick={() => router.push(selectedPoint.entry_link)}
-                >
-                  {selectedPoint.entry_title}
-                </Text>
-                <Text w={800}>Wolbachia Presence:</Text>
-                <Text>{selectedPoint.wolbachia_presence}</Text>
-                <Text w={800}>Location:</Text>
-                <Text>
-                  long: {selectedPoint.location_lon}, lat:{" "}
-                  {selectedPoint.location_lat}
-                </Text>
-              </PopoverBody>
-            </PopoverContent>
-          </Popover>
-        </Popup>
-      )}
-    </div>
-  );
-};
+export function PointLayer() {
+    return (
+        <Layer 
+        id='wolbachia-point'
+        type='circle'
+        source='combined-source'
+        minzoom={14}
+        paint={{
+          // increase the radius of the circle as the zoom level and dbh value increases
+          'circle-radius': {
+            'property': 'dbh',
+            'type': 'exponential',
+            'stops': [
+              [{ zoom: 15, value: 1 }, 5],
+              [{ zoom: 15, value: 62 }, 10],
+              [{ zoom: 22, value: 1 }, 20],
+              [{ zoom: 22, value: 62 }, 50]
+            ]
+          },
+          'circle-color': {
+            'property': 'dbh',
+            'type': 'exponential',
+            'stops': [
+              [0, 'rgba(236,222,239,0)'],
+              [10, 'rgb(236,222,239)'],
+              [20, 'rgb(208,209,230)'],
+              [30, 'rgb(166,189,219)'],
+              [40, 'rgb(103,169,207)'],
+              [50, 'rgb(28,144,153)'],
+              [60, 'rgb(1,108,89)']
+            ]
+          },
+          'circle-stroke-color': 'white',
+          'circle-stroke-width': 1,
+          'circle-opacity': {
+            'stops': [
+              [14, 0],
+              [15, 1]
+            ]
+          }
+        }}
+      />
+    )
+}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Skeleton } from "@chakra-ui/react";
 import axios from "axios";
 import { Feature, FeatureCollection, Point } from "geojson";
 import { Map, Source, Layer } from "react-map-gl";
@@ -11,7 +12,13 @@ import {
   useToast,
   UseToastOptions,
 } from "@chakra-ui/react";
-import { NegativeHeatmapLayer, Points, PositiveHeatmapLayer } from "./map_layers";
+import {
+    ExtrusionLayer,
+  NegativeHeatmapLayer,
+  PointLayer,
+  Points,
+  PositiveHeatmapLayer,
+} from "./map_layers";
 
 export interface WolbachiaData {
   entry_link: string;
@@ -26,6 +33,7 @@ interface WolbachiaMapProps {
   show_heatmap_positive_wolbachia: boolean;
   show_heatmap_negative_wolbachia: boolean;
   show_points_wolbachia: boolean;
+  show_extrusion_wolbachia: boolean;
 }
 
 const fetchWolbachiaData = async (
@@ -52,6 +60,7 @@ const fetchWolbachiaData = async (
 const WolbachiaMap: React.FC<WolbachiaMapProps> = (props) => {
   const [data, setData] = useState<WolbachiaData[]>([]);
   const toast = useToast();
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
 
   useEffect(() => {
     fetchWolbachiaData(toast).then((data) => {
@@ -93,7 +102,7 @@ const WolbachiaMap: React.FC<WolbachiaMapProps> = (props) => {
       });
   }, [toast]);
 
-  const heatmapPoints: FeatureCollection<Point> = {
+  const combinedPoints: FeatureCollection<Point> = {
     type: "FeatureCollection",
     features: data
       .filter((item) =>
@@ -109,7 +118,11 @@ const WolbachiaMap: React.FC<WolbachiaMapProps> = (props) => {
 
         const feature: Feature<Point> = {
           type: "Feature",
-          properties: { intensity },
+          properties: {
+            intensity,
+            title: item.entry_title,
+            link: item.entry_link,
+          },
           geometry: {
             type: "Point",
             coordinates: [longitude, latitude],
@@ -185,18 +198,32 @@ const WolbachiaMap: React.FC<WolbachiaMapProps> = (props) => {
         style={{ height: "80vh", width: "100%" }}
         mapStyle="mapbox://styles/mapbox/dark-v11"
         mapboxAccessToken={mapboxKey}
+        onLoad={() => setIsMapLoaded(true)}
       >
+        {!isMapLoaded && <Skeleton height="80vh" width="100%" />}
+
         <Source
-        id="negative-heatmap-source"
-        type="geojson"
-        data={{
+          id="combined-source"
+          type="geojson"
+          data={{
+            type: "FeatureCollection",
+            features: combinedPoints.features,
+          }}
+        >
+          {props.show_points_wolbachia && <PointLayer />}
+          {props.show_extrusion_wolbachia && <ExtrusionLayer />}
+        </Source>
+
+        <Source
+          id="negative-heatmap-source"
+          type="geojson"
+          data={{
             type: "FeatureCollection",
             features: negativePoints.features,
-        }}
+          }}
         >
-            {/* {props.show_heatmap_wolbachia && <HeatmapLayer />} */}
-            {props.show_heatmap_negative_wolbachia && <NegativeHeatmapLayer />}
-            {props.show_points_wolbachia && <Points data={data} />}
+          {/* {props.show_heatmap_wolbachia && <HeatmapLayer />} */}
+          {props.show_heatmap_negative_wolbachia && <NegativeHeatmapLayer />}
         </Source>
         <Source
           id="positive-heatmap-source"
@@ -206,9 +233,8 @@ const WolbachiaMap: React.FC<WolbachiaMapProps> = (props) => {
             features: positivePoints.features,
           }}
         >
-           { props.show_heatmap_positive_wolbachia && <PositiveHeatmapLayer />}
+          {props.show_heatmap_positive_wolbachia && <PositiveHeatmapLayer />}
         </Source>
-        
       </Map>
     );
   } else {

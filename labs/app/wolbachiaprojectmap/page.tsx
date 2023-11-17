@@ -21,19 +21,21 @@ import {
   Heading,
   Switch,
   Divider,
+  useColorMode,
 } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import WolbachiaMap from "./components/wolbachia_heatmap";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function MapPage() {
   const router = useRouter();
   const theme = useTheme();
 
   const [showHeatmapPositive, setShowHeatmapPositive] = useState(true);
-  const [showHeatmapNegative, setShowHeatmapNegative] = useState(false);
+  const [showHeatmapNegative, setShowHeatmapNegative] = useState(true);
   const [showPoints, setShowPoints] = useState(false);
+  const [ShowExtrusionGraph, setShowExtrusionGraph] = useState(false);
   const [filterWolbachia, setFilterWolbachia] = useState<
     "yes" | "no" | "unknown" | "both"
   >("both");
@@ -60,6 +62,7 @@ export default function MapPage() {
             </Button>
             <WolbachiaMap
               show_heatmap_negative_wolbachia={showHeatmapNegative}
+              show_extrusion_wolbachia={ShowExtrusionGraph}
               show_heatmap_positive_wolbachia={showHeatmapPositive}
               filter_heatmap_wolbachia={filterWolbachia}
               show_points_wolbachia={showPoints}
@@ -99,6 +102,20 @@ export default function MapPage() {
                         }
                       />
                     </FormControl>
+
+                    {/* <FormControl display="flex" alignItems="center" mt={4}>
+                      <FormLabel htmlFor="show-heatmap" mb="0">
+                        Show Extrusion Graph
+                      </FormLabel>
+                      <Switch
+                        id="show-extrusion"
+                        isChecked={ShowExtrusionGraph}
+                        onChange={(e) =>
+                          setShowExtrusionGraph(e.target.checked)
+                        }
+                      />
+                    </FormControl>
+
                     <Divider mt={4} mb={4}/>
                     <FormControl display="flex" alignItems="center" mt={4}>
                       <FormLabel htmlFor="show-points" mb="0">
@@ -109,7 +126,7 @@ export default function MapPage() {
                         isChecked={showPoints}
                         onChange={(e) => setShowPoints(e.target.checked)}
                       />
-                    </FormControl>
+                    </FormControl> */}
                   </DrawerBody>
 
                   <DrawerFooter>
