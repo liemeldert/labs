@@ -210,7 +210,7 @@ const WolbachiaMap: React.FC<WolbachiaMapProps> = (props) => {
             features: combinedPoints.features,
           }}
         >
-          {props.show_points_wolbachia && <PointLayer />}
+          {props.show_points_wolbachia && <PointLayer source={"combined-source"} />}
           {props.show_extrusion_wolbachia && <ExtrusionLayer />}
         </Source>
 
