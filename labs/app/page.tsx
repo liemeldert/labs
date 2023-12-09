@@ -12,7 +12,7 @@ export default function Home() {
         alt: "Heatmap showing Wolbachia spread",
         title: "Interactive Wolbachia Map",
         description: "Interactive map to visualize how Wolbachia spreads. Based off work & data from The Wolbachia Project.",
-        link: "/posts/wolbachiaprojectmap"
+        link: "/pages/wolbachiaprojectmap"
     },
     {
         image: "/post_images/quark-logo.png",
