@@ -19,28 +19,25 @@ export function PositiveHeatmapLayer() {
       id="heatmap-layer-pos"
       type="heatmap"
       source="positive-heatmap-source"
-      maxzoom={14}
+      maxzoom={24}
       paint={{
         // Increase the heatmap weight based on frequency and property magnitude
         "heatmap-weight": [
           "interpolate",
           ["linear"],
-          ["get", "intensity"],
+          ["case", ["==", ["get", "intensity"], null], 0, ["get", "intensity"]], // use 0 if intensity is null
           0.5,
           0.5,
           1,
           1,
         ],
         "heatmap-radius": [
-            "interpolate",
-            ["linear"],
-            ["get", "dataAmount"],
-            0, 10,
-            25, 25,
-            50, 50,
-            75, 75,
-            100, 100
-          ],
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          0, ["interpolate", ["linear"], ["case", ["==", ["get", "dataAmount"], null], 0, ["get", "dataAmount"]], 0, 10, 100, 50], // use 0 if dataAmount is null
+          14, ["interpolate", ["linear"], ["case", ["==", ["get", "dataAmount"], null], 0, ["get", "dataAmount"]], 0, 10, 100, 50] // use 0 if dataAmount is null
+        ],
         // Increase the heatmap color weight weight by zoom level
         // heatmap-intensity is a multiplier on top of heatmap-weight
         "heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 0, 1, 9, 3],
@@ -77,28 +74,25 @@ export function NegativeHeatmapLayer() {
       id="heatmap-layer"
       type="heatmap"
       source="negative-heatmap-source"
-      maxzoom={14}
+      maxzoom={24}
       paint={{
         // Increase the heatmap weight based on frequency and property magnitude
         "heatmap-weight": [
           "interpolate",
           ["linear"],
-          ["get", "intensity"],
+          ["case", ["==", ["get", "intensity"], null], 0, ["get", "intensity"]], // use 0 if intensity is null
           0.5,
           0.5,
           1,
           1,
         ],
         "heatmap-radius": [
-            "interpolate",
-            ["linear"],
-            ["get", "dataAmount"],
-            0, 10,
-            25, 25,
-            50, 50,
-            75, 75,
-            100, 100
-          ],
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          0, ["interpolate", ["linear"], ["case", ["==", ["get", "dataAmount"], null], 0, ["get", "dataAmount"]], 0, 10, 100, 50], // use 0 if dataAmount is null
+          14, ["interpolate", ["linear"], ["case", ["==", ["get", "dataAmount"], null], 0, ["get", "dataAmount"]], 0, 10, 100, 50] // use 0 if dataAmount is null
+        ],
         // Increase the heatmap color weight weight by zoom level
         // heatmap-intensity is a multiplier on top of heatmap-weight
         "heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 0, 1, 9, 3],
@@ -157,15 +151,14 @@ export function ExtrusionLayer() {
     )
 }
 
-export function PointLayer() {
+export function PointLayer({ source }: { source: string }) {
     return (
         <Layer 
         id='wolbachia-point'
         type='circle'
-        source='combined-source'
+        source={source}
         minzoom={14}
         paint={{
-          // increase the radius of the circle as the zoom level and dbh value increases
           'circle-radius': {
             'property': 'dbh',
             'type': 'exponential',
@@ -180,7 +173,7 @@ export function PointLayer() {
             'property': 'dbh',
             'type': 'exponential',
             'stops': [
-              [0, 'rgba(236,222,239,0)'],
+              [0, 'rgba(236,222,239,255)'],
               [10, 'rgb(236,222,239)'],
               [20, 'rgb(208,209,230)'],
               [30, 'rgb(166,189,219)'],

@@ -114,7 +114,7 @@ export default function MapPage() {
                           setShowExtrusionGraph(e.target.checked)
                         }
                       />
-                    </FormControl>
+                      </FormControl>*/}
 
                     <Divider mt={4} mb={4}/>
                     <FormControl display="flex" alignItems="center" mt={4}>
@@ -126,7 +126,7 @@ export default function MapPage() {
                         isChecked={showPoints}
                         onChange={(e) => setShowPoints(e.target.checked)}
                       />
-                    </FormControl> */}
+                    </FormControl>
                   </DrawerBody>
 
                   <DrawerFooter>

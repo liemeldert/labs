@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  mongo:
+      image: mongo
+      restart: always
+      environment:
+        MONGO_INITDB_ROOT_USERNAME: 'linus'
+        MONGO_INITDB_ROOT_PASSWORD: 'uiregjfkd889u34r(*&$#^%)rt45ert454893489u3448rtegigtyhodgrthyfklmdrteg'
+      networks:
+        - labs-net
+  labs-web:
+    image: 'ghcr.io/liemeldert/labs-next:latest'
+    restart: always
+    ports:
+      - '3002:3000'
+    environment:
+      MONGODB_HOST: "mongo:27017"
+      MONGODB_URI: "mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo:27017/?authMechanism=DEFAULT"
+      DB_NAME: "wolbachiaproject"
+      NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: "pk.eyJ1IjoiY2Jlb21qdW4iLCJhIjoiY2xwMWNjOHZtMGhqZzJycDVuZG1oemx0dSJ9.1uJMiEr1JOC9U3VtBjKDgQ"
+    networks:
+      - labs-net
+
+networks:
+  labs-net:

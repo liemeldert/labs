@@ -149,6 +149,7 @@ const WolbachiaMap: React.FC<WolbachiaMapProps> = (props) => {
         return feature;
       }),
   };
+  console.log(combinedPoints);
 
   const negativePoints: FeatureCollection<Point> = {
     type: "FeatureCollection",
